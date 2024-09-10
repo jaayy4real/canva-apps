@@ -16,6 +16,7 @@ export const App = () => {
   const [selectedText, setSelectedText] = useState<string>("");
   const [inputError, setInputError] = useState<boolean>(false);
   const [selectionWarning, setSelectionWarning] = useState<boolean>(false);
+  const [selectedOption, setSelectedOption] = useState<string>("Resume");
 
 
 
@@ -45,6 +46,54 @@ export const App = () => {
     setInputError(false);
   };
 
+  const handleSelectChange = (value: string) => {
+    setSelectedOption(value); // Update selected option state
+  };
+
+  const getPromptContent = () => {
+    switch (selectedOption) {
+      case "Resume":
+        return `
+          You will be provided with a section of a resume and a job description, both delimited with XML tags.
+          
+          1. Identify the type of resume section provided (e.g., education, experience, skills, statement, job title, etc.).
+          2. Rewrite the resume section to make it more relevant to the job description.
+          3. If the section is identified as "Skills," generate the same number of skills that match the job description and ensure it is returned in a bullet-point style as an array of skills.
+          4. Return the output as a JSON object in the following format: 
+          
+          {
+            "section_name": "<Identified section type>",
+            "revised_section": "<Rewritten resume section>"
+          }
+        `;
+      case "Cover-letter":
+        return `
+          You will be provided with  the section of a cover letter and a job description, both delimited with XML tags.
+          1. Rewrite the cover letter section to make it more relevant to the job description.
+          2. Ensure the cover letter is professional, concise, and tailored to the job description.
+          3. Return the output as a JSON object in the following format: 
+          
+          {
+            "revised_section": "<Rewritten cover letter section>"
+          }
+        `;
+      case "Custom":
+        return `
+          Provide specific instructions based on custom input provided by the user.
+          
+          1. Adapt the provided text to fit the context described by the user.
+          2. Ensure that the output is coherent, relevant, and fits the requested style.
+          3. Return the output as a JSON object in the following format: 
+          
+          {
+            "revised_section": "<Rewritten custom section>"
+          }
+        `;
+      default:
+        return "";
+    }
+  };
+
   const onClick = async () => {
     try {
 
@@ -68,27 +117,15 @@ export const App = () => {
         messages: [
           {
             role: "system",
-            content: `
-            You will be provided with a section of a resume and a job description, both delimited with XML tags.
-            
-            1. Identify the type of resume section provided (e.g., education, experience, skills, statement, job title, etc.).
-            2. Rewrite the resume section to make more relivant to the job description.s
-            3. If the section is identified as "Skills," generate same number of skills that match to the job description and ensure it is returned in a bullet-point style as an array of skills.
-            4. Return the output as a JSON object in the following format: 
-            
-            {
-              "section_name": "<Identified section type>",
-              "revised_section": "<Rewritten resume section>"
-            }
-            `,
+            content: getPromptContent(),
           },
           {
             role: "user",
-            content: `<resume_section>${selectedText}</resume_section><job_description>${inputValue}</job_description>`,
+            content: `<section>${selectedText}</section><job_description>${inputValue}</job_description>`,
           },
         ],
       });
-     //3. If the section is identified as "Skills," generate same number of skills that match to the job description and ensure it is returned in a bullet-point style as an array of skills.
+//3. If the section is identified as "Skills," generate same number of skills that match to the job description and ensure it is returned in a bullet-point style as an array of skills.
 // 3. If the section is identified as "Skills," if skill is already relevant to the role do not change else replace with skill that matches the job description and finally returned in a bullet-point style as an array of skills.
 
       const result = completion.choices[0].message.content;
@@ -154,6 +191,8 @@ export const App = () => {
         },
         ]}
         stretch
+        value={selectedOption}
+        onChange={handleSelectChange} 
         />
       <TextInput
           placeholder={inputError ? "Text input is empty" : "Enter something..."}
