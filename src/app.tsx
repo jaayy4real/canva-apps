@@ -105,13 +105,17 @@ export const App = () => {
           {
             role: "system",
             content: getPromptContent(),
+            content: getPromptContent(),
           },
           {
             role: "user",
             content: `<section>${selectedText}</section><job_description>${inputValue}</job_description>`,
+            content: `<section>${selectedText}</section><job_description>${inputValue}</job_description>`,
           },
         ],
       });
+//3. If the section is identified as "Skills," generate same number of skills that match to the job description and ensure it is returned in a bullet-point style as an array of skills.
+// 3. If the section is identified as "Skills," if skill is already relevant to the role do not change else replace with skill that matches the job description and finally returned in a bullet-point style as an array of skills.
 
       const result = completion.choices[0].message.content;
       const revised = JSON.parse(result ?? "{}");
@@ -127,7 +131,7 @@ export const App = () => {
           content.text = finalText ?? "this is the default value";
         }
       }
-
+``
       await draft.save();
     } catch (error) {
       console.error("Error updating the content:", error);
@@ -175,6 +179,7 @@ export const App = () => {
           }
           value={inputValue}
           onChange={handleChange}
+          error={inputError}
           error={inputError}
         />
 
